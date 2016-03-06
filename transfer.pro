@@ -7,7 +7,7 @@ DEFINES += ENABLE_WALLET
 DEFINES += BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
 CONFIG += thread
-CONFIG += static
+#CONFIG += static
 #CONFIG += openssl-linked
 CONFIG += openssl
 
@@ -32,6 +32,21 @@ DEFINES += BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
+
+win32 {
+BOOST_LIB_SUFFIX=-mgw49-mt-s-1_60
+BOOST_INCLUDE_PATH=C:/MyProjects/Deps/boost_1_60_0
+BOOST_LIB_PATH=C:/MyProjects/Deps/boost_1_60_0/stage/lib
+BDB_INCLUDE_PATH=C:/MyProjects/Deps/db-4.8.30.NC/build_unix
+BDB_LIB_PATH=C:/MyProjects/Deps/db-4.8.30.NC/build_unix
+OPENSSL_INCLUDE_PATH=C:/MyProjects/Deps/openssl-1.0.2f/include
+OPENSSL_LIB_PATH=C:/MyProjects/Deps/openssl-1.0.2f
+MINIUPNPC_INCLUDE_PATH=C:/MyProjects/Deps
+MINIUPNPC_LIB_PATH=C:/MyProjects/Deps/miniupnpc
+QRENCODE_INCLUDE_PATH=C:/MyProjects/Deps/qrencode-3.4.4
+QRENCODE_LIB_PATH=C:/MyProjects/Deps/qrencode-3.4.4/.libs
+}
+
 
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
@@ -60,9 +75,9 @@ QMAKE_CXXFLAGS *= -D_FORTIFY_SOURCE=2
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # on Windows: enable GCC large address aware linker flag
-win32:QMAKE_LFLAGS *= -Wl,--large-address-aware -static
+#win32:QMAKE_LFLAGS *= -Wl,--large-address-aware -static
 # i686-w64-mingw32
-win32:QMAKE_LFLAGS *= -static-libgcc -static-libstdc++
+#win32:QMAKE_LFLAGS *= -static-libgcc -static-libstdc++
 
 # use: qmake "USE_QRCODE=1"
 # libqrencode (http://fukuchi.org/works/qrencode/index.en.html) must be installed for support
@@ -102,7 +117,7 @@ SOURCES += src/txdb-leveldb.cpp
         QMAKE_RANLIB = $$replace(QMAKE_STRIP, strip, ranlib)
     }
     LIBS += -lshlwapi
-    #genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
+    genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
 }
 genleveldb.target = $$PWD/src/leveldb/libleveldb.a
 genleveldb.depends = FORCE
@@ -115,10 +130,9 @@ QMAKE_CLEAN += $$PWD/src/leveldb/libleveldb.a; cd $$PWD/src/leveldb ; $(MAKE) cl
 #Build Secp256k1
 INCLUDEPATH += src/secp256k1/include
 LIBS += $$PWD/src/secp256k1/src/libsecp256k1_la-secp256k1.o
-!win32 {
-    # we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
-    gensecp256k1.commands = cd $$PWD/src/secp256k1 && ./autogen.sh && ./configure --enable-module-recovery && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\"
-}
+# we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
+gensecp256k1.commands = cd $$PWD/src/secp256k1 && ./autogen.sh && ./configure --enable-module-recovery && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\"
+
 gensecp256k1.target = $$PWD/src/secp256k1/src/libsecp256k1_la-secp256k1.o
 gensecp256k1.depends = FORCE
 PRE_TARGETDEPS += $$PWD/src/secp256k1/src/libsecp256k1_la-secp256k1.o
